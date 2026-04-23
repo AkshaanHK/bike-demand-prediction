@@ -144,7 +144,7 @@ train['month_cos']   = np.cos(2 * np.pi * train['mnth'] / 12)
 
 ## Tech Stack
 
-- Python / R
+- Python
 - scikit-learn
 - TensorFlow / Keras
 - pandas, numpy
