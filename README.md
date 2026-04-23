@@ -136,7 +136,7 @@ train['month_cos']   = np.cos(2 * np.pi * train['mnth'] / 12)
 
 ```text
 ├── bike_sharing_forecast.ipynb     # Full pipeline: preprocessing → modeling → evaluation
-├── report.pdf              # Final report
+├── MachineLearning_Report_Team_ABA.pdf              # Final report
 ├── README.md
 ```
 
