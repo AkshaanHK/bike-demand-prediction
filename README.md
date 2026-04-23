@@ -84,14 +84,15 @@ train['month_cos']   = np.cos(2 * np.pi * train['mnth'] / 12)
 
 ### Local Evaluation (Train/Test)
 
-| Model | Train MAE | Test MAE |
-|------|----------:|---------:|
-| Linear Regression | 91.28 | 91.08 |
-| Lasso Regression | 91.23 | 91.03 |
-| Decision Tree (depth=5) | 60.76 | 63.84 |
-| Random Forest | 9.74 | 25.91 |
-| Gradient Boosting | 12.54 | 23.99 |
-| SVR (RBF kernel) | — | 43.22 |
+| Model | Test MAE |
+|------|---------:|
+| Linear Regression | 90.57 |
+| Lasso Regression | 90.55 |
+| Decision Tree (depth=5) | 63.77 |
+| Random Forest | 25.49 |
+| Gradient Boosting | 24.44 |
+| SVR (RBF kernel) | 43.41 |
+| Deep Neural Network | 24.09 |
 
 ### Kaggle Evaluation
 
@@ -107,7 +108,7 @@ train['month_cos']   = np.cos(2 * np.pi * train['mnth'] / 12)
 ## Model Highlights
 
 **Gradient Boosting**
-- Best test-set MAE among classical models (23.99)
+- Best test-set MAE among classical models (24.44)
 - Hyperparameter tuning via 5-fold cross-validation
 - Balanced bias-variance tradeoff
 
