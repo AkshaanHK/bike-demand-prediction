@@ -1,143 +1,83 @@
-# Bike Demand Prediction
+# Bike Sharing Demand Forecasting
+
+**MSc Statistics – Machine Learning Competition (Kaggle, Fall 2024)**  
+Team ABA: Arijan Seipi, Bastien Olivier Mutzner, Akshaan Murugesu
+
+---
 
 ## Overview
 
-This project aims to forecast bike rental demand using machine learning models based on temporal and weather-related features.
-
-The objective is to build a predictive model that helps a bike rental company anticipate demand over a three-month period, supporting operational planning and financial decision-making.
+Prediction of hourly bike rental counts for a Geneva-based bike-sharing company ("Mule"), using a dataset with temporal, meteorological and economic features. Goal: provide 3-month sales forecasts and business insights. Evaluated with **Mean Absolute Error (MAE)** on Kaggle.
 
 ---
 
 ## Dataset
 
-The dataset consists of historical bike rental data, including:
-
-- Time-related variables (hour, weekday, month, year)
-- Weather conditions (temperature, humidity, wind speed, weather category)
-- Binary indicators (working day, holiday)
-- Target variable: `cnt` (number of rented bikes)
-
-The training dataset contains approximately 15,000 observations.
+- **15,211 hourly observations**, 15 features (temporal + weather + target `cnt`)
+- Key features: `hr`, `temp`, `season`, `yr`, `workingday`, `weathersit`, `hum`, `windspeed`
+- Target: `cnt` — total bike rentals (casual + registered)
 
 ---
 
-## Methodology
+## Data Preprocessing
 
-### 1. Data Preprocessing
-
-- Removed non-informative features (`Id`, `dteday`)
-- Handled missing values using context-aware imputation strategies
-- Addressed multicollinearity by removing highly correlated variables (`atemp`)
-- Converted categorical variables into suitable numerical formats
+- **Missing value imputation**: forward-fill for temporal/categorical columns, interpolation (neighbor average) for numerical columns (`temp`, `atemp`, `hum`, `windspeed`)
+- **Feature encoding**: ordinal encoding for categorical variables (`season`, `weathersit`, etc.)
+- **Dropped**: `Id`, `dteday`, `atemp` (near-perfect correlation with `temp`, r = 0.99)
 
 ---
 
-### 2. Feature Engineering
+## Exploratory Data Analysis
 
-- Created cyclical features for time variables:
-  - Hour → `sin(hour)`, `cos(hour)`
-  - Month → `sin(month)`, `cos(month)`
-  - Weekday → `sin(weekday)`, `cos(weekday)`
-
-- These transformations allow models to capture periodic patterns such as:
-  - Daily commuting cycles
-  - Seasonal effects
+Key findings:
+- **Rush hours** (7–9h, 16–18h) drive demand on weekdays; weekends show a smooth afternoon peak
+- **Summer** has the highest rentals; **Winter** the lowest — temperature is a primary driver
+- **Bike usage grew significantly** from 2011 to 2012, suggesting strong business growth trend
+- Distribution of `cnt` is heavily right-skewed
 
 ---
 
-### 3. Model Development
+## Feature Engineering
 
-Several models were implemented and compared:
+Cyclical sine/cosine encoding for periodic temporal features to capture their circular nature:
 
-- Linear Regression (baseline)
-- Lasso Regression
-- Decision Tree
-- Random Forest
-- Gradient Boosting
-- Support Vector Regression (SVR)
-- Neural Network (MLP)
+```python
+train['hour_sin']    = np.sin(2 * np.pi * train['hr'] / 24)
+train['hour_cos']    = np.cos(2 * np.pi * train['hr'] / 24)
+train['weekday_sin'] = np.sin(2 * np.pi * train['weekday'] / 7)
+train['weekday_cos'] = np.cos(2 * np.pi * train['weekday'] / 7)
+train['month_sin']   = np.sin(2 * np.pi * train['mnth'] / 12)
+train['month_cos']   = np.cos(2 * np.pi * train['mnth'] / 12)
+```
+---
+
+## Models & Results
+
+| Model | Train MAE | Test MAE | Kaggle MAE |
+|---|---|---|---|
+| Linear Regression | 91.28 | 91.08 | — |
+| Lasso Regression | 91.23 | 91.03 | — |
+| Decision Tree (depth=5) | 60.76 | 63.84 | — |
+| Random Forest | 9.74 | 25.91 | 54.37 |
+| Gradient Boosting | 12.54 | 23.99 | 43.32 |
+| SVR (RBF kernel) | — | 43.22 | 65.85 |
+| Deep Neural Network | — | — | **35.75**|
+
+**Best model**: Deep Neural Network with LeakyReLU, Dropout, BatchNorm and early stopping.
+
+### Model highlights
+
+**Gradient Boosting** — best test-set MAE among classical models (23.99). Hyperparameters tuned with 5-fold CV grid search (`n_estimators`, `learning_rate`, `max_depth`). 1-SE rule applied to balance performance vs. generalization.
+
+**Deep Neural Network** — 3 hidden layers (256 → 128 → 64), LeakyReLU activation, Dropout (0.2), BatchNormalization, EarlyStopping. Preprocessing pipeline: OneHotEncoding for categoricals + StandardScaler for numericals.
 
 ---
 
-### 4. Evaluation
+## Business Insights for Mule
 
-Models were evaluated using:
-
-- Mean Absolute Error (MAE) on validation/test data
-- External leaderboard performance (Kaggle-style evaluation)
-
----
-
-## Results
-
-| Model                | Test MAE | Leaderboard MAE |
-|---------------------|----------|------------------|
-| Linear Regression   | ~91      | ~96              |
-| Lasso               | ~91      | ~96              |
-| Decision Tree       | ~64      | ~71              |
-| Random Forest       | ~26      | ~54              |
-| Gradient Boosting   | ~24      | ~43              |
-| SVR                 | ~43      | ~66              |
-| Neural Network      | -        | ~36              |
-
-Key observations:
-
-- Tree-based models significantly outperform linear models
-- Gradient Boosting achieves the best test performance
-- Neural networks show strong generalization after tuning
-- Some models overfit despite strong validation scores
+- **Time of day** is the most important predictor (hour_cos, hour_sin dominate feature importance across all tree-based models)
+- **Temperature** is the second most influential factor — plan fleet capacity seasonally
+- **Weekday vs. weekend** usage patterns differ fundamentally — tailor fleet distribution accordingly
+- Demand is projected to **grow significantly** in 2012 vs. 2011, even in off-season months
 
 ---
-
-## Key Insights
-
-- **Time variables (hour, weekday, month)** are the most predictive features
-- Demand shows strong daily and seasonal patterns
-- Weather conditions (especially temperature) strongly influence usage
-- Working days exhibit different demand patterns compared to weekends
-
-
----
-
-## Code
-
-The main implementation is available in:
-
-- `src/`
-
-Key components:
-
-- Data preprocessing pipeline
-- Feature engineering functions
-- Model training and evaluation
-- Prediction pipeline
-
-The notebook (`notebooks/`) provides a complete walkthrough of the analysis.
-
----
-
-## Reproducibility
-
-- Python 3.x
-- Libraries: scikit-learn, pandas, numpy, matplotlib
-
-
----
-
-## Applications
-
-This project demonstrates skills relevant to:
-
-- Demand forecasting
-- Time series feature engineering
-- Machine learning model selection
-- Business-oriented data analysis
-
----
-
-## Author
-
-Akshaan Murugesu
-Arijan Seipi
-Bastien Olivier Mutzner
-Master’s Students in Statistics – University of Geneva
