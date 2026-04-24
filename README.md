@@ -10,7 +10,6 @@ Predicting hourly bike rental counts using a dataset from a bike-sharing company
 
 ```
 ├── bike_demand_notebook.ipynb      # Full pipeline: EDA → preprocessing → modelling → evaluation
-├── MachineLearning_Report_Team_ABA.pdf   # Full written report
 ├── BikeSharing_Report.pdf          # Synthesized report
 ├── README.md
 ```
