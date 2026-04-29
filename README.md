@@ -9,9 +9,11 @@ Predicting hourly bike rental counts using a dataset from a bike-sharing company
 ## Project Structure
 
 ```
-├── BikeSharing_Report.pdf          # Synthesized report
+├── BikeSharing_Report.pdf         # Synthesized report
 ├── README.md
-├── bike_demand_notebook.ipynb      # Full pipeline with the help of AI: EDA → preprocessing → modelling → evaluation
+├── bike_demand_notebook.ipynb     # Full pipeline: EDA → preprocessing → modelling → evaluation
+├── train.csv
+└── test.csv
 ```
 
 ---
@@ -73,8 +75,15 @@ Key modelling choices:
 
 ---
 
+## AI Usage
+
+AI tools (Claude, ChatGPT) were used to assist with code debugging, refactoring, and documentation. All modelling choices, feature engineering decisions, and interpretations are entirely our own.
+
+---
+
 ## Authors
 
 Arijan Seipi · Bastien Olivier Mutzner · Akshaan Murugesu
+
 MSc Statistics — University of Geneva
 
